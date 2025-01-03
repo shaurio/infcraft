@@ -1,0 +1,6 @@
+
+                    {% for btn in btns %}
+                        <div id="btn-{{btn.id}}" class="btn btn-sm btn-outline-secondary" draggable="true">
+                            {{btn.label}} {{btn.emoji}}
+                        </div>
+                    {% endfor %}

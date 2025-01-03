@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>InfCraft Turbo</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div id="btnLab" class="col-sm-9 border" style="height:100vh;">
+                Button Labo
+
+                <form id="itemform" action="{% url 'home' %}" method="POST">
+                    <div class="input-group mb-3">
+                        <input id="item1" name="item1" type="text" class="form-control" placeholder="Item1"
+                               aria-label="Item1"
+                               aria-describedby="button-addon1">
+                        <input id="item2" name="item2" type="text" class="form-control" placeholder="Item2"
+                               aria-label="Item2"
+                               aria-describedby="button-addon1">
+                        <button id="submit_item" class="btn btn-outline-secondary" type="submit">Mix!</button>
+                    </div>
+                </form>
+
+            <h2>It has mixed to become: {{response}}</h2>
+
+                <ul id="gpt" style="list-style-type: none;border:4px solid black;padding: 20px;border-radius: 20px;border-bottom: 8px solid black;border-bottom: 8px solid black;">
+                    <li></li>
+                </ul>
+
+            </div>
+            <div id="btnCan" class="col-sm-3 border" style="height:100vh;">
+                <div id="btnItems" class="border-bottom mt-4" style="height: 80vh;">
+                    {% include 'includes/btnItems.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.min.js" integrity="sha256-AlTido85uXPlSyyaZNsjJXeCs07eSv3r43kyCVc8ChI=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+    <script>
+
+
+         $( function() {
+           // Make btn-<id> draggable with revert option
+
+           function refreshBtnItems(){
+
+           // refresh the tubby ItemHolder (itemCan)
+           // update itemCan div with all buttons, from server
+           // get ajax to fetch btns from server
+
+           $.ajax({
+                type:'POST',
+                url: "{% url 'refresh_btns' %}",
+                success: function(data){
+                    $("#btnItems").html(data.btns_html);
+                } // succes
+           }); //end ajax
+           } // end refreshBtnItems
+
+
+           $("div[id^='btn-']").draggable({
+             revert: function(droppableObj){
+               if (!droppableObj){
+                 return true;
+               } else {
+                 return false;
+               }
+             } // end revert fn
+           }); // end draggable
+
+
+           $("#btnLab").droppable({
+              accept: "div[id^='btn-']",
+              drop: function(event, ui)
+              {
+                refreshBtnItems();
+              }
+            }); //end droppable
+         }); //end refresh
+
+</script>
+
+<script>
+
+    $('#itemform').submit(function(e){
+            e.preventDefault();
+            const url_home = "{% url 'home' %}"
+            var item1 = $('#item1').val();
+            var item2 = $('#item2').val();
+            var data = JSON.stringify({'item1': item1, 'item2': item2})
+
+            $.ajax({
+                type: 'POST',
+                url: url_home,
+                data: data,
+                beforeSend: function() {
+                    alert("before send data = "+ data);
+                    $('#submit_item').html('<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Loading');
+                },
+                success: function(data){
+
+                    $('#btnItems').append("<li>" + data.response + "</li>");
+
+                     //$('#item1').val('');
+                     //$('#item2').val('');
+                     $('#submit_item').html("Send");
+                },
+            }); // end ajax
+    }); // end submit
+
+</script>
+
+</body>
+</html>
